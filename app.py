@@ -15,10 +15,23 @@ from langchain.chains.question_answering import load_qa_chain
 # 1. SETUP HALAMAN WEB
 st.set_page_config(page_title="Jarvis Pro Max", page_icon="🤖", layout="wide")
 
-# Load API Key
-load_dotenv()
-os.environ["GOOGLE_API_KEY"] = os.getenv("GEMINI_API_KEY")
 
+# Load API Key (Logika Cerdas: Lokal vs Cloud)
+load_dotenv()
+
+# 1. Coba ambil dari .env (Cara Laptop)
+api_key = os.getenv("GEMINI_API_KEY")
+
+# 2. Kalau kosong, ambil dari Streamlit Secrets (Cara Cloud)
+if not api_key:
+    try:
+        api_key = st.secrets["GEMINI_API_KEY"]
+    except:
+        st.error("❌ API Key belum disetting! Cek 'Advanced Settings' di Streamlit Cloud.")
+        st.stop()
+
+# 3. Pasang kuncinya
+os.environ["GOOGLE_API_KEY"] = api_key
 # --- SESSION STATE ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
