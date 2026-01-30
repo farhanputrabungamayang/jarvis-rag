@@ -15,8 +15,22 @@ from langchain.chains.question_answering import load_qa_chain
 # 1. SETUP HALAMAN WEB
 st.set_page_config(page_title="Jarvis Pro Max", page_icon="🤖", layout="wide")
 
+# --- FITUR PENGAMAN (LOGIN) ---
+with st.sidebar:
+    st.image("https://cdn-icons-png.flaticon.com/512/2593/2593491.png", width=50) # Hiasan ikon gembok
+    st.subheader("🔒 Login Area")
+    sandi = st.text_input("Masukkan Password:", type="password")
 
-# Load API Key (Logika Cerdas: Lokal vs Cloud)
+    # Ganti 'admin123' dengan password yang Masbro mau
+    if sandi != "admin123": 
+        st.warning("⚠️ Masukkan password dulu untuk mengakses Jarvis!")
+        st.info("Hubungi pemilik jika butuh akses.")
+        st.stop()  # 🛑 STOP DISINI kalau password salah
+    else:
+        st.success("🔓 Akses Diterima!")
+        st.divider()
+
+# --- SETUP API KEY (LOGIKA CERDAS) ---
 load_dotenv()
 
 # 1. Coba ambil dari .env (Cara Laptop)
@@ -32,6 +46,7 @@ if not api_key:
 
 # 3. Pasang kuncinya
 os.environ["GOOGLE_API_KEY"] = api_key
+
 # --- SESSION STATE ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -60,7 +75,6 @@ def get_files_text(uploaded_files):
             
             # === BACA EXCEL (.xlsx) ===
             elif file_extension == 'xlsx':
-                # Baca Excel jadi DataFrame, lalu ubah jadi teks string
                 df = pd.read_excel(file)
                 text += df.to_string(index=False)
             
@@ -112,12 +126,11 @@ def get_conversational_chain():
     chain = load_qa_chain(model, chain_type="stuff")
     return chain
 
-# 3. SIDEBAR (UPLOAD MULTI-FORMAT)
+# 3. SIDEBAR LANJUTAN (UPLOAD MENU)
 with st.sidebar:
-    st.title("📂 Dokumen Saya")
-    st.write("Dukung format: PDF, DOCX, XLSX, TXT")
+    st.subheader("📂 Dokumen Saya")
+    st.write("Format: PDF, DOCX, XLSX, TXT")
     
-    # Update accept_multiple_files biar bisa macam-macam
     uploaded_files = st.file_uploader("Upload disini", 
                                    type=['pdf', 'docx', 'xlsx', 'txt'], 
                                    accept_multiple_files=True)
@@ -125,7 +138,6 @@ with st.sidebar:
     if st.button("Proses & Hafalkan"):
         if uploaded_files:
             with st.spinner("Sedang memproses berbagai jenis file..."):
-                # Panggil fungsi baru get_files_text
                 raw_text = get_files_text(uploaded_files)
                 
                 if raw_text:
@@ -138,13 +150,15 @@ with st.sidebar:
         else:
             st.warning("Pilih file dulu dong Masbro!")
 
-# 4. AREA CHAT
+# 4. AREA CHAT UTAMA
 st.header("🤖 Jarvis Pro Max (Omnivore Edition)")
 
+# Tampilkan Chat History
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+# Input User
 if prompt := st.chat_input("Tanya sesuatu tentang dokumen..."):
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -156,6 +170,7 @@ if prompt := st.chat_input("Tanya sesuatu tentang dokumen..."):
         embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
         vector_db = st.session_state.vector_store
         
+        # Coba load dari file lokal jika session kosong
         if vector_db is None and os.path.exists("faiss_index"):
              vector_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
 
