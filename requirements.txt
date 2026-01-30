@@ -12,3 +12,4 @@ openpyxl
 python-dotenv
 SpeechRecognition
 streamlit-mic-recorder
+Pillow
