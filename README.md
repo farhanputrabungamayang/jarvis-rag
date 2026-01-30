@@ -1,26 +1,32 @@
-# 🤖 Jarvis RAG (Retrieval-Augmented Generation)
+# 🤖 Jarvis Pro Max - AI Document Assistant
 
-Jarvis adalah asisten AI cerdas yang dirancang untuk membantu pengguna memahami dokumen kompleks dengan cepat. Dibangun menggunakan teknologi **LangChain** dan **Google Gemini**, aplikasi ini mampu membaca, memahami, dan menjawab pertanyaan dari berbagai format dokumen.
+Jarvis adalah asisten AI berbasis **RAG (Retrieval-Augmented Generation)** yang dirancang untuk menganalisis dan berdiskusi mengenai isi dokumen. Tidak seperti chatbot biasa, Jarvis "membaca" dokumen Anda terlebih dahulu sebelum menjawab, sehingga jawabannya akurat dan berbasis fakta.
 
-🔗 **Coba Langsung (Live Demo):** [https://jarvis-rag-project.streamlit.app/]
+🔗 **Live Demo:** [https://jarvis-rag-project.streamlit.app/]
+
+![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit)
+![LangChain](https://img.shields.io/badge/LangChain-Integration-green?style=for-the-badge)
+![Gemini](https://img.shields.io/badge/AI-Google%20Gemini-orange?style=for-the-badge)
 
 ## ✨ Fitur Unggulan
-* **Omnivore Reader:** Mendukung format PDF, DOCX (Word), XLSX (Excel), dan TXT.
-* **Context Aware:** Memiliki memori percakapan, sehingga diskusi bisa berjalan dua arah layaknya chatting dengan manusia.
-* **Secure Access:** Dilengkapi sistem login sederhana untuk keamanan penggunaan.
-* **Anti-Hallucination:** Menggunakan metode RAG untuk memastikan jawaban berdasarkan fakta di dalam dokumen, bukan karangan AI.
+* **🔐 Secure Access:** Dilengkapi sistem login sederhana untuk keamanan penggunaan.
+* **📄 Omnivore Reader:** Mendukung format **PDF, Word (DOCX), Excel (XLSX), dan TXT**.
+* **🧠 Context Memory:** Memiliki ingatan percakapan, bisa diajak diskusi panjang (Follow-up questions).
+* **💬 Interactive UI:** Tampilan chat modern ala WhatsApp/ChatGPT.
 
-## 🛠️ Teknologi (Tech Stack)
-* **Language:** Python 3.11
-* **Framework:** Streamlit (Frontend), LangChain (Orchestrator)
-* **AI Model:** Google Gemini 2.0 Flash / 1.5 Pro
-* **Vector Database:** FAISS (Facebook AI Similarity Search)
+## 🛠️ Tech Stack
+Project ini dibangun menggunakan teknologi terkini di bidang Generative AI:
+* **Framework:** Streamlit (Frontend), LangChain (Orchestrator).
+* **LLM:** Google Gemini 2.0 Flash / 1.5 Pro.
+* **Vector DB:** FAISS (Facebook AI Similarity Search).
+* **Libraries:** `PyPDF2`, `python-docx`, `pandas`, `python-dotenv`.
 
-## 🚀 Cara Menjalankan di Lokal
-1. Clone repository ini.
+## 🚀 Cara Menjalankan (Lokal)
+1. Clone repo ini: `git clone https://github.com/farhanputrabungamayang/jarvis-rag.git`
 2. Install dependencies: `pip install -r requirements.txt`
-3. Buat file `.env` dan masukkan API Key Google Gemini.
+3. Setup API Key Google Gemini di `.env`.
 4. Jalankan: `streamlit run app.py`
 
 ---
-*Project ini dibuat sebagai bagian dari portofolio pengembangan AI Engineer.*
+*Created with ❤️ by Farhan.*
