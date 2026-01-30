@@ -44,13 +44,30 @@ if not api_key:
         st.stop()
 
 os.environ["GOOGLE_API_KEY"] = api_key
-genai.configure(api_key=api_key) # Konfigurasi buat Vision
+genai.configure(api_key=api_key)
 
 # --- SESSION STATE ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "vector_store" not in st.session_state:
     st.session_state.vector_store = None
+
+# --- FUNGSI EXPORT KE WORD (FITUR BARU) ---
+def create_docs(chat_history):
+    doc = Document()
+    doc.add_heading('Laporan Percakapan Jarvis', 0)
+    
+    for msg in chat_history:
+        role = "User 👤" if msg["role"] == "user" else "Jarvis 🤖"
+        p = doc.add_paragraph()
+        p.add_run(f"{role}:").bold = True
+        p.add_run(f"\n{msg['content']}\n")
+        p.add_run("-" * 50)
+    
+    # Simpan ke Memory Buffer (Bukan file fisik)
+    bio = io.BytesIO()
+    doc.save(bio)
+    return bio
 
 # --- FUNGSI AUDIO ---
 def transcribe_audio(audio_bytes):
@@ -115,9 +132,7 @@ def get_conversational_chain():
     model = ChatGoogleGenerativeAI(model="gemini-flash-latest", temperature=0.3)
     return load_qa_chain(model, chain_type="stuff")
 
-# --- FUNGSI KHUSUS VISION (MATA DEWA) ---
 def analyze_image(image_file, prompt):
-    # Pakai model khusus Vision (Gemini 1.5 Flash)
     model = genai.GenerativeModel('gemini-1.5-flash')
     img = Image.open(image_file)
     response = model.generate_content([prompt, img])
@@ -142,21 +157,34 @@ with st.sidebar:
     st.subheader("👁️ Mata Dewa (Vision)")
     uploaded_image = st.file_uploader("Upload Gambar/Screenshot", type=['jpg', 'jpeg', 'png'])
     if uploaded_image:
-        st.image(uploaded_image, caption="Gambar yang akan dianalisa", use_column_width=True)
+        st.image(uploaded_image, caption="Preview", use_column_width=True)
+
+    st.divider()
+    st.subheader("🖨️ Export Chat")
+    if st.button("Siapkan Laporan Word"):
+        if st.session_state.messages:
+            doc_file = create_docs(st.session_state.messages)
+            st.download_button(
+                label="📥 Download Laporan (.docx)",
+                data=doc_file.getvalue(),
+                file_name="Laporan_Jarvis.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+        else:
+            st.warning("Ngobrol dulu dong, baru download!")
 
     st.divider()
     st.subheader("🎙️ Voice Input")
     audio = mic_recorder(start_prompt="Rekam", stop_prompt="Stop", key='recorder')
 
 # --- LOGIKA CHAT UTAMA ---
-st.header("🤖 Jarvis Pro Max (Vision Edition)")
+st.header("🤖 Jarvis Pro Max (Vision + Export)")
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 prompt = None
-# Cek Audio
 if audio:
     if "last_audio" not in st.session_state or st.session_state.last_audio != audio['bytes']:
         text_from_audio = transcribe_audio(audio['bytes'])
@@ -164,7 +192,6 @@ if audio:
             prompt = text_from_audio
             st.session_state.last_audio = audio['bytes']
 
-# Cek Ketikan
 if not prompt:
     prompt = st.chat_input("Kirim pesan (Teks/Suara/Gambar)...")
 
@@ -178,13 +205,9 @@ if prompt:
         response = ""
         
         try:
-            # === LOGIKA PENTING: CEK GAMBAR DULU ===
             if uploaded_image:
-                # Jika ada gambar, masuk Mode Vision
                 with st.spinner("Melihat gambar..."):
                     response = analyze_image(uploaded_image, prompt)
-            
-            # === JIKA TIDAK ADA GAMBAR, CEK DOKUMEN (RAG) ===
             else:
                 embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
                 vector_db = st.session_state.vector_store
